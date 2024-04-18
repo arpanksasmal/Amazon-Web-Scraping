@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Amazon Web Scrapping</h1>
+        <div>
+            <label for="product">Search Amazon Products: </label>
+            <input type="text" id="product" name="product">
+        </div>
+        <button id="search">Find</button>
+        <div id="add_to_me">            
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript">
+        $("#search").on("click", function(){
+            $.ajax({
+                type:'POST',
+                url:"/amazon",
+                data: JSON.stringify({sendinfo:$("#product").val()}),
+                contentType: 'application/json; charset=utf-8',
+                success:function(response){
+                    addCode(response);
+                },
+                error:function(response){
+                    console.log('error');
+                }
+            })
+        });
+
+        function addCode(data){
+            $('#add_to_me').empty();
+
+            var table = document.createElement('table');        
+            var arrHead = new Array();
+            arrHead = ['Description', 'Price', 'Rating', 'Go there'];
+            var tr = table.insertRow(-1);
+            for (var h = 0; h < arrHead.length; h++) {
+                var th = document.createElement('th');              
+                th.innerHTML = arrHead[h];
+                tr.appendChild(th);
+            }
+            for (var c = 0; c < data["links"].length; c++) {
+                tr = table.insertRow(-1);
+                for (var j = 0; j < 4; j++) { 
+                    var td = document.createElement('td');         
+                    td = tr.insertCell(-1);
+                    if (j==0){
+                        td.innerHTML = data["texto"][c];            
+                    }
+                    else if (j==1){
+                        td.innerHTML = data["prices"][c];
+                    }
+                    else if (j==2) { 
+                        td.innerHTML = data["ratings"][c];
+                    }
+                    else{
+                        td.innerHTML = '<button onclick= "window.open(\''+data["links"][c]+ '\')",_blank)";>Click here</button>';
+                    }
+                }
+            }        
+            document.getElementById("add_to_me").appendChild(table);
+        }
+
+    </script>
+</body>
+</html>
